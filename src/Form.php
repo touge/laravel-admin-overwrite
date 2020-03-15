@@ -23,17 +23,16 @@ class Form extends \Encore\Admin\Form
      */
     public function store()
     {
-        $data = Input::all();
+        $data = \request()->all();
 
         // Handle validation errors.
         if ($validationMessages = $this->validationMessages($data)) {
-
             /**
              * 是否为ajax提交
              */
             $this->ajaxRequestFailedCheck($validationMessages);
 
-            return back()->withInput()->withErrors($validationMessages);
+            return $this->responseValidationError($validationMessages);
         }
 
         if (($response = $this->prepare($data)) instanceof Response) {
@@ -63,35 +62,29 @@ class Form extends \Encore\Admin\Form
         return $this->redirectAfterStore();
     }
 
-    /**
-     * Handle update.
-     *
-     * @param int $id
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
     public function update($id, $data = null)
     {
-        $data = ($data) ?: Input::all();
-        $isEditable = $this->isEditable($data);
-        $data = $this->handleEditable($data);
-        $data = $this->handleFileDelete($data);
+        $data = ($data) ?: request()->all();
 
-        if ($this->handleOrderable($id, $data)) {
-            return response([
-                'status'  => true,
-                'message' => trans('admin.update_succeeded'),
-            ]);
+        $isEditable = $this->isEditable($data);
+
+        if (($data = $this->handleColumnUpdates($id, $data)) instanceof Response) {
+            return $data;
         }
 
         /* @var Model $this->model */
-        $this->model = $this->model->with($this->getRelations())->findOrFail($id);
+        $builder = $this->model();
+
+        if ($this->isSoftDeletes) {
+            $builder = $builder->withTrashed();
+        }
+
+        $this->model = $builder->with($this->getRelations())->findOrFail($id);
 
         $this->setFieldOriginalValue();
 
         // Handle validation errors.
         if ($validationMessages = $this->validationMessages($data)) {
-
             /**
              * 是否为ajax提交
              */
@@ -99,9 +92,9 @@ class Form extends \Encore\Admin\Form
 
             if (!$isEditable) {
                 return back()->withInput()->withErrors($validationMessages);
-            } else {
-                return response()->json(['errors' => array_dot($validationMessages->getMessages())], 422);
             }
+
+            return response()->json(['errors' => Arr::dot($validationMessages->getMessages())], 422);
         }
 
         if (($response = $this->prepare($data)) instanceof Response) {
