@@ -9,10 +9,9 @@
 namespace Touge\AdminOverwrite\Grid\Tools;
 
 
-use Encore\Admin\Grid\Tools\AbstractTool;
-use App\Admin\Development\Grid\Grid;
+use Touge\AdminOverwrite\Grid\Grid;
 
-class CreateButton extends AbstractTool
+class CreateButton extends \Encore\Admin\Grid\Tools\CreateButton
 {
     /**
      * @var Grid
@@ -36,7 +35,7 @@ class CreateButton extends AbstractTool
      */
     public function render()
     {
-        if (!$this->grid->allowCreation()) {
+        if (!$this->grid->showCreateBtn()) {
             return '';
         }
 
@@ -44,7 +43,7 @@ class CreateButton extends AbstractTool
 
         return <<<EOT
 
-<div class="btn-group pull-right" style="margin-right: 10px">
+<div class="btn-group pull-right grid-create-btn" style="margin-right: 10px">
     <a href="{$this->grid->getCreateUrl()}" class="btn btn-sm btn-success btn-create" title="{$new}">
         <i class="fa fa-plus"></i><span class="hidden-xs">&nbsp;&nbsp;{$new}</span>
     </a>

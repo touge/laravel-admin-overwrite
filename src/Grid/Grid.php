@@ -9,6 +9,8 @@
 namespace Touge\AdminOverwrite\Grid;
 
 use Touge\AdminOverwrite\Grid\Displayers\Actions;
+use Touge\AdminOverwrite\Grid\Tools\CreateButton;
+
 class Grid extends \Encore\Admin\Grid
 {
     /**
@@ -31,6 +33,15 @@ class Grid extends \Encore\Admin\Grid
 
         $this->addColumn('__actions__', trans('admin.action'))
             ->displayUsing($this->actionsClass, [$this->actionsCallback]);
+    }
+
+    /**
+     * 重写 grid 中的新增表单，添加btn.create标识
+     * @return string
+     */
+    public function renderCreateButton()
+    {
+        return (new CreateButton($this))->render();
     }
 
 }
