@@ -14,21 +14,28 @@ class Details
     protected $name = '详情';
     protected $resource_url;
 
+    protected $params= [
+        'name'=> '详情',
+        'url'=> '#',
+        'icon'=> 'fa-info-circle', //fa
+        'style'=> 'warning',
+    ];
+
     /**
      * Details constructor.
-     * @param string $resource_url
+     * @param array $params [name,url,icon]
      */
-    public function __construct($resource_url='')
+    public function __construct(Array $params= [])
     {
-        $this->resource_url = $resource_url;
+        $this->params = array_merge($this->params, $params);
     }
 
     protected function render()
     {
-        $view = trans('admin.view');
+        $view = $this->params['name'];
         return <<<EOT
-<a href="{$this->resource_url}" class="btn btn-warning btn-details">
-    <i class="fa fa-info-circle"></i> $this->name
+<a href="{$this->params['url']}" class="btn btn-{$this->params['style']} btn-details">
+    <i class="fa {$this->params['icon']}"></i> $view
 </a>
 EOT;
     }
